@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{% if post %}编辑文章{% else %}新建文章{% endif %}</h1>
+    
+    <form class="post-form" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="title">标题</label>
+            <input type="text" id="title" name="title" value="{{ post.title if post else '' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="content">内容</label>
+            <textarea id="content" name="content" rows="20" required>{{ post.content if post else '' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="tags">标签（用逗号分隔）</label>
+            <input type="text" id="tags" name="tags" value="{{ post.tags|map(attribute='name')|join(',') if post else '' }}">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn">保存</button>
+            <a href="{{ url_for('admin.index') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function togglePreview() {
+    const content = document.getElementById('content').value;
+    const preview = document.getElementById('preview');
+    const csrf_token = document.querySelector('meta[name="csrf-token"]').content;
+    
+    if (preview.style.display === 'none') {
+        fetch('/api/preview', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify({ content: content })
+        })
+        .then(response => response.json())
+        .then(data => {
+            preview.innerHTML = data.html;
+            preview.style.display = 'block';
+        });
+    } else {
+        preview.style.display = 'none';
+    }
+}
+</script>
+{% endblock %} 

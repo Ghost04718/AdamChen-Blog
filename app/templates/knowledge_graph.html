@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}知识图谱 - 鸭蛋橙博客{% endblock %}
+{% block description %}文章和标签关系的可视化展示{% endblock %}
+
+{% block content %}
+<div class="graph-container">
+    <div class="graph-header">
+        <h1>知识图谱</h1>
+        <p class="graph-description">
+            通过知识图谱可视化展示文章和标签之间的关联关系。
+            <br>
+            - 红色节点代表标签，绿色节点代表文章
+            <br>
+            - 节点大小表示关联度，连线粗细表示关联强度
+            <br>
+            - 可以拖拽节点、缩放视图，双击重置
+        </p>
+    </div>
+    
+    <div id="knowledge-graph"></div>
+    <div id="loading" class="loading" style="display: none;">加载中...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="{{ url_for('static', filename='js/knowledge_graph.js') }}"></script>
+{% endblock %} 

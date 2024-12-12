@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1>文章管理</h1>
+        <a href="{{ url_for('admin.new_post') }}" class="btn">新建文章</a>
+    </div>
+    
+    <div class="post-list">
+        {% for post in posts %}
+        <div class="post-item">
+            <div class="post-info">
+                <h3>{{ post.title }}</h3>
+                <div class="post-meta">
+                    <span>{{ post.created_at.strftime('%Y-%m-%d') }}</span>
+                    <span>👁️ {{ post.views }}</span>
+                    <span>👍 {{ post.likes }}</span>
+                </div>
+            </div>
+            <div class="post-actions btn-group">
+                <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="btn btn-primary">
+                    <span class="icon">✏️</span>
+                    <span>编辑</span>
+                </a>
+                <form method="post" action="{{ url_for('admin.delete_post', post_id=post.id) }}" 
+                      onsubmit="return confirm('确定要删除这篇文章吗？');" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">删除</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}标签云 - 鸭蛋橙博客{% endblock %}
+{% block description %}浏览所有文章标签，包含{{ tags|length }}个标签{% endblock %}
+{% block keywords %}标签,分类,{{ tags.keys()|join(',') }}{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="content-container">
+        <h1>标签云</h1>
+        <div class="tag-cloud">
+            {% for tag, count in tags.items() %}
+            <a href="{{ url_for('main.tag', tag=tag) }}" class="tag" style="font-size: {{ 100 + count * 10 }}%">
+                {{ tag }} ({{ count }})
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <!-- 博客计 -->
+        <section class="sidebar-section">
+            <h3>博客统计</h3>
+            <div class="blog-stats">
+                <p><span class="stats-number">{{ total_posts }}</span> 篇文章</p>
+                <p><span class="stats-number">{{ total_tags }}</span> 个标签</p>
+                <p><span class="stats-number">{{ total_views }}</span> 次浏览</p>
+            </div>
+        </section>
+
+        <!-- 最近文章 -->
+        <section class="sidebar-section">
+            <h3>最近文章</h3>
+            <ul class="recent-posts">
+                {% for post in recent_posts %}
+                <li>
+                    <a href="{{ url_for('main.post', post_id=post.id) }}">
+                        {{ post.title }}
+                        <div class="post-meta-sidebar">
+                            {{ post.created_at.strftime('%Y-%m-%d') }} · {{ post.views }} 阅读
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </aside>
+</div>
+{% endblock %} 

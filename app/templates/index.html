@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <div class="posts-container">
+        {% for post in posts.items %}
+        <article class="post-card">
+            <h2><a href="{{ url_for('main.post', post_id=post.id) }}">{{ post.title }}</a></h2>
+            <div class="post-meta">
+                <span>{{ post.created_at.strftime('%Y-%m-%d') }}</span>
+                <span>阅读: {{ post.views }}</span>
+                <span>点赞: {{ post.likes }}</span>
+            </div>
+            <div class="post-tags">
+                {% for tag in post.tags %}
+                <a href="{{ url_for('main.tag', tag=tag.name) }}" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+            <div class="post-preview">
+                {{ post.preview }}
+            </div>
+            <a href="{{ url_for('main.post', post_id=post.id) }}" class="read-more">阅读全文</a>
+        </article>
+        {% endfor %}
+
+        {% include '_pagination.html' %}
+    </div>
+
+    <aside class="sidebar">
+        <!-- 博客统计 -->
+        <section class="sidebar-section">
+            <h3>博客统计</h3>
+            <div class="blog-stats">
+                <p><span class="stats-number">{{ total_posts }}</span> 篇文章</p>
+                <p><span class="stats-number">{{ total_tags }}</span> 个标签</p>
+                <p><span class="stats-number">{{ total_views }}</span> 次浏览</p>
+            </div>
+        </section>
+
+        <!-- 最近文章 -->
+        <section class="sidebar-section">
+            <h3>最近文章</h3>
+            <ul class="recent-posts">
+                {% for post in recent_posts %}
+                <li>
+                    <a href="{{ url_for('main.post', post_id=post.id) }}">
+                        {{ post.title }}
+                        <div class="post-meta-sidebar">
+                            {{ post.created_at.strftime('%Y-%m-%d') }} · {{ post.views }} 阅读
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- 标签云 -->
+        <section class="sidebar-section">
+            <h3>标签云</h3>
+            <div class="sidebar-tags">
+                {% for tag, count in tags.items() %}
+                <a href="{{ url_for('main.tag', tag=tag) }}" class="tag" 
+                   style="font-size: {{ 0.8 + count/max_count * 0.5 }}em">
+                    {{ tag }}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </aside>
+</div>
+{% endblock %} 

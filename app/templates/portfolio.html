@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}作品集 - 鸭蛋橙博客{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="content-container">
+        <h1>作品集</h1>
+        <div class="portfolio-grid">
+            {% for project in projects %}
+            <div class="portfolio-item">
+                {% if project.image_url %}
+                    <img src="{{ project.image_url }}" alt="{{ project.title }}">
+                {% else %}
+                    <div class="portfolio-placeholder">
+                        <span class="portfolio-icon">🎨</span>
+                    </div>
+                {% endif %}
+                <div class="portfolio-info">
+                    <h3>{{ project.title }}</h3>
+                    <p>{{ project.description }}</p>
+                    <div class="portfolio-links">
+                        {% if project.github_url %}
+                        <a href="{{ project.github_url }}" target="_blank">GitHub</a>
+                        {% endif %}
+                        {% if project.project_url %}
+                        <a href="{{ project.project_url }}" target="_blank">在线演示</a>
+                        {% endif %}
+                    </div>
+                    <div class="portfolio-tags">
+                        {% for tag in project.tags.split(',') %}
+                        <span class="tag">{{ tag.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <!-- 博客统计 -->
+        <section class="sidebar-section">
+            <h3>博客统计</h3>
+            <div class="blog-stats">
+                <p><span class="stats-number">{{ total_posts }}</span> 篇文章</p>
+                <p><span class="stats-number">{{ total_tags }}</span> 个标签</p>
+                <p><span class="stats-number">{{ total_views }}</span> 次浏览</p>
+            </div>
+        </section>
+
+        <!-- 最近文章 -->
+        <section class="sidebar-section">
+            <h3>最近文章</h3>
+            <ul class="recent-posts">
+                {% for post in recent_posts %}
+                <li>
+                    <a href="{{ url_for('main.post', post_id=post.id) }}">
+                        {{ post.title }}
+                        <div class="post-meta-sidebar">
+                            {{ post.created_at.strftime('%Y-%m-%d') }} · {{ post.views }} 阅读
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- 标签云 -->
+        <section class="sidebar-section">
+            <h3>标签云</h3>
+            <div class="sidebar-tags">
+                {% for tag, count in tags.items() %}
+                <a href="{{ url_for('main.tag', tag=tag) }}" class="tag" 
+                   style="font-size: {{ 0.8 + count/max_count * 0.5 }}em">
+                    {{ tag }}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </aside>
+</div>
+{% endblock %} 

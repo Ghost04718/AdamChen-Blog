@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+
+{% block title %}评论管理 - 鸭蛋橙博客{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>评论管理</h1>
+    </div>
+    
+    <div class="comments-list">
+        {% for comment in comments.items %}
+        <div class="comment-item" data-id="{{ comment.id }}">
+            <div class="comment-header">
+                <div class="comment-info">
+                    <span class="comment-author">{{ comment.author_name }}</span>
+                    <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="comment-post">
+                    评论文章：<a href="{{ url_for('main.post', post_id=comment.post_id) }}" target="_blank">{{ comment.post.title }}</a>
+                </div>
+            </div>
+            <div class="comment-content">{{ comment.content }}</div>
+            <div class="comment-actions">
+                <button class="delete-btn" onclick="deleteComment({{ comment.id }})">删除评论</button>
+                <button class="edit-btn" onclick="editComment({{ comment.id }})">编辑评论</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% include '_comment_pagination.html' %}
+</div>
+
+<form onsubmit="return false;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+<script>
+function deleteComment(commentId) {
+    if (confirm('确定要删除这条评论吗？')) {
+        const csrf_token = document.querySelector('input[name=csrf_token]').value;
+        fetch(`/admin/comment/${commentId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`.comment-item[data-id="${commentId}"]`).remove();
+            } else {
+                alert('删除失败：' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败，请重试');
+        });
+    }
+}
+
+function editComment(commentId) {
+    const commentItem = document.querySelector(`.comment-item[data-id="${commentId}"]`);
+    const content = commentItem.querySelector('.comment-content').textContent;
+    const newContent = prompt('编辑评论内容：', content);
+    const csrf_token = document.querySelector('input[name=csrf_token]').value;
+    
+    if (newContent && newContent !== content) {
+        fetch(`/admin/comment/${commentId}/edit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify({ content: newContent })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                commentItem.querySelector('.comment-content').textContent = newContent;
+            } else {
+                alert('编辑失败：' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('编辑失败，请重试');
+        });
+    }
+}
+</script>
+{% endblock %} 

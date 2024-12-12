@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - 鸭蛋橙博客{% endblock %}
+{% block description %}{{ post.content[:200]|striptags }}{% endblock %}
+{% block keywords %}{{ post.tags|map(attribute='name')|join(',') }}{% endblock %}
+
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{{ post.content[:200]|striptags }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <article class="post">
+        <h1>{{ post.title }}</h1>
+        <div class="post-meta">
+            <span>{{ post.created_at.strftime('%Y-%m-%d') }}</span>
+            <div class="post-stats">
+                <span class="post-views" title="总访问量">👁️ {{ post.views }}</span>
+                <span class="post-views-daily" title="今日访问">📈 {{ post.daily_views }}</span>
+                <span class="post-views-weekly" title="本周访问">📊 {{ post.weekly_views }}</span>
+                <span class="post-views-monthly" title="本月访问">📅 {{ post.monthly_views }}</span>
+            </div>
+            {% if post.tags %}
+            <span class="tags">
+                {% for tag in post.tags %}
+                <a href="{{ url_for('main.tag', tag=tag.name) }}" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </span>
+            {% endif %}
+        </div>
+        <div class="post-content markdown-body" id="content">
+            {{ post.html_content|safe }}
+        </div>
+        <div class="post-actions">
+            <button type="button" class="like-btn" 
+                    data-post-id="{{ post.id }}"
+                    data-liked="{{ 'true' if post.id in session.get('liked_posts', []) else 'false' }}">
+                <span class="like-icon">❤️</span>
+                <span class="like-count">{{ post.likes }}</span>
+            </button>
+        </div>
+        
+        <div class="comments">
+            <h3>评论 ({{ post.comments.count() }})</h3>
+            
+            <div class="comment-list">
+                {% for comment in post.comments %}
+                <div class="comment">
+                    <div class="comment-meta">
+                        <span class="comment-author">{{ comment.author_name or '匿名用户' }}</span>
+                        <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="comment-content">
+                        {{ comment.content }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <form class="comment-form" id="comment-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <input type="text" name="author_name" placeholder="你的昵称（可选）">
+                </div>
+                <div class="form-group">
+                    <textarea name="content" required placeholder="写下你的评论..."></textarea>
+                </div>
+                <button type="submit">发表评论</button>
+                <div class="comment-error" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </article>
+</div>
+
+<script src="{{ url_for('static', filename='js/post.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('comment-form');
+    const commentList = document.querySelector('.comment-list');
+    const commentError = document.querySelector('.comment-error');
+    const commentCount = document.querySelector('.comments h3');
+    
+    commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const csrf_token = document.querySelector('meta[name="csrf-token"]').content;
+        
+        // 禁用提交按钮
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        
+        fetch(`/post/{{ post.id }}/comment`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrf_token
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 添加新评论到列表
+                const commentHTML = `
+                    <div class="comment">
+                        <div class="comment-meta">
+                            <span class="comment-author">${data.comment.author_name}</span>
+                            <span class="comment-date">${data.comment.created_at}</span>
+                        </div>
+                        <div class="comment-content">
+                            ${data.comment.content}
+                        </div>
+                    </div>
+                `;
+                commentList.insertAdjacentHTML('afterbegin', commentHTML);
+                
+                // 更新评论计数
+                const count = commentList.querySelectorAll('.comment').length;
+                commentCount.textContent = `评论 (${count})`;
+                
+                // 清空表单
+                commentForm.reset();
+                commentError.style.display = 'none';
+            } else {
+                commentError.textContent = data.error;
+                commentError.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            commentError.textContent = '评论提交失败，请重试';
+            commentError.style.display = 'block';
+        })
+        .finally(() => {
+            // 恢复提交按钮
+            submitButton.disabled = false;
+        });
+    });
+});
+</script>
+{% endblock %} 

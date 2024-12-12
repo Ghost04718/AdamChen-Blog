@@ -1,0 +1,15 @@
+{% if posts.pages > 1 %}
+<div class="pagination">
+    {% if posts.has_prev %}
+    <a href="{{ url_for(request.endpoint, page=posts.prev_num, q=request.args.get('q', ''), tag=request.args.get('tag', '')) }}" class="prev">上一页</a>
+    {% endif %}
+    
+    <span class="current">
+        第 {{ posts.page }} 页 / 共 {{ posts.pages }} 页
+    </span>
+    
+    {% if posts.has_next %}
+    <a href="{{ url_for(request.endpoint, page=posts.next_num, q=request.args.get('q', ''), tag=request.args.get('tag', '')) }}" class="next">下一页</a>
+    {% endif %}
+</div>
+{% endif %} 

@@ -1,0 +1,20 @@
+{% if comments.pages > 1 %}
+<div class="pagination">
+    {% if comments.has_prev %}
+    <a href="{{ url_for(request.endpoint, page=comments.prev_num) }}" class="prev">上一页</a>
+    {% endif %}
+    
+    <span class="current">
+        第 {{ comments.page }} 页 / 共 {{ comments.pages }} 页
+    </span>
+    
+    {% if comments.has_next %}
+    <a href="{{ url_for(request.endpoint, page=comments.next_num) }}" class="next">下一页</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- 添加无评论提示 -->
+{% if not comments.items %}
+<div class="no-comments">暂无评论</div>
+{% endif %} 
