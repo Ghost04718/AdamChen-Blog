@@ -59,4 +59,4 @@ app/static/uploads/
 add_data.py
 portfolio_examples.json
 app/__pycache__
-migration/
+migrations/
